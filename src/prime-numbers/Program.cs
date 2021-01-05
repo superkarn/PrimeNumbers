@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace prime_numbers
 {
@@ -14,7 +15,7 @@ namespace prime_numbers
             var outputLocation = @"D:\temp\prime-numbers\output.png";
 
             var data = LoadData(dataLocation);
-            CreateImage(outputLocation, 200, 100, data);
+            CreateImage(outputLocation, 200, 200, data);
         }
 
         static int[] LoadData(string fileName)
@@ -40,14 +41,29 @@ namespace prime_numbers
                 // The number of pixels in this image
                 var maxPixelCount = width * height;
 
+                var lastPrime = 0;
+
                 // Loop until we run out of prime numbers or pixels
                 for (var ii = 0; ii < maxNumber && ii < maxPixelCount; ii++)
                 {
                     // Prime numbers
                     if (data.Contains(ii))
                     {
+                        // Check for Twin prime
+                        var isTwinPrime = (ii == lastPrime+2 || Array.IndexOf(data, ii+2) > -1);
+
+                        // Twin primes are red
+                        if (isTwinPrime)
+                        {
+                            image[x, y] = new Rgba32(255, 0, 0);
+                        }
                         // Regular primes are blue
-                        image[x, y] = new Rgba32(0, 0, 255);
+                        else 
+                        {
+                            image[x, y] = new Rgba32(0, 0, 255);
+                        }
+
+                        lastPrime = ii;
                     }
                     
                     // Move the pixel left to right, then top to bottom
@@ -66,6 +82,9 @@ namespace prime_numbers
                 Directory.CreateDirectory(Path.GetDirectoryName(fileName));
                 //Console.WriteLine($"Current folder: {System.AppDomain.CurrentDomain.BaseDirectory}");
                 //Console.WriteLine($"Output folder:  {Path.GetDirectoryName(fileName)}");
+
+                // Resize the image to make it easier to see.  Leaving height as 0 to keep the same aspect ratio
+                image.Mutate(x => x.Resize(width*4, 0));
 
                 // Save the image
                 image.Save(fileName);
