@@ -13,7 +13,13 @@ namespace prime_numbers
 {
     class Program
     {
-        static readonly bool USE_PARALLELIZATION = true;
+        // TODO Convert these to input parameters
+        static bool useParallelization = true;
+        static int imageWidth = 100;
+        static int imageHeight = 100;
+        static int startFrame = 3;
+        static int endFrame = imageWidth; // Must be <= imageWidth
+
         static readonly Rgba32 BLUE = new Rgba32(0, 0, 255);
         static readonly Rgba32 GREEN = new Rgba32(0, 255, 0);
         static readonly Rgba32 RED = new Rgba32(255, 0, 0);
@@ -24,8 +30,6 @@ namespace prime_numbers
             var timer = new Stopwatch();
             timer.Start();
 
-            var imageWidth = 200;
-            var imageHeight = 200;
             string[] dataLocations = { 
                 @".\data\primes-to-100k.txt", 
                 @".\data\primes-to-200k.txt", 
@@ -40,9 +44,12 @@ namespace prime_numbers
             };
             var outputLocation = $"D:\\temp\\prime-numbers\\{imageWidth}x{imageHeight}.gif";
 
+            Console.WriteLine($"------------------------------");
+            Console.WriteLine($"Parameters");
+            Console.WriteLine($"    Parallelization: {useParallelization}");
+            Console.WriteLine($"    Image dimension: {imageWidth}x{imageHeight}");
+            Console.WriteLine($"    Frames: {startFrame} to {endFrame}");
             Console.WriteLine($"");
-            Console.WriteLine($"Parallelization: {USE_PARALLELIZATION}");
-            Console.WriteLine($"Image dimension: {imageWidth}x{imageHeight}");
 
             var data = LoadData(dataLocations);
             using(var gif = CreateGif(imageWidth, imageHeight, data))
@@ -52,8 +59,9 @@ namespace prime_numbers
             
             timer.Stop();
 
-            Console.WriteLine($"Total runtime: {timer.Elapsed.ToString("mm':'ss'.'fff")}");
             Console.WriteLine($"");
+            Console.WriteLine($"Total runtime: {timer.Elapsed.ToString("mm':'ss'.'fff")}");
+            Console.WriteLine($"------------------------------");
         }
 
         static Image<Rgba32> CreateGif(int width, int height, int[] data)
@@ -63,7 +71,7 @@ namespace prime_numbers
             ImageFrame<Rgba32>[] frames;
 
             Console.Write($"Creating frames ");
-            if (USE_PARALLELIZATION)
+            if (useParallelization)
             {
                 frames = CreateGifFrames_Parallel(width, height, data);
             }
@@ -73,7 +81,7 @@ namespace prime_numbers
             }
 
             // Add each frame to the gif
-            for (int ii = 3; ii < frames.Length; ii++)
+            for (int ii = startFrame; ii < endFrame && ii < frames.Length; ii++)
             {
                 gif.Frames.AddFrame(frames[ii]);
             }
@@ -95,7 +103,7 @@ namespace prime_numbers
         {
             var frames = new ImageFrame<Rgba32>[width];
             
-            for (int ii = 3; ii < width; ii++) 
+            for (int ii = startFrame; ii < endFrame && ii < width ; ii++) 
             {
                 Console.Write($".");
                 frames[ii] = CreateImage(ii, width, height, data).Frames[0]; 
@@ -111,7 +119,7 @@ namespace prime_numbers
         {
             var frames = new ImageFrame<Rgba32>[width];
 
-            Parallel.For(3, width, ii =>
+            Parallel.For(startFrame, Math.Min(endFrame, width), ii =>
                 {
                     Console.Write($".");
                     frames[ii] = CreateImage(ii, width, height, data).Frames[0];                    
@@ -156,12 +164,12 @@ namespace prime_numbers
                     // Twin primes
                     if (isTwinPrime)
                     {
-                        image[x, y] = RED;
+                        image[x, y] = BLUE;
                     }
                     // Regular primes
                     else 
                     {
-                        image[x, y] = WHITE;
+                        image[x, y] = BLUE;
                     }
 
                     lastPrime = ii;
