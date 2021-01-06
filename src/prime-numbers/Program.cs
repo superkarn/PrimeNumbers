@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using SixLabors.ImageSharp;
@@ -18,8 +19,11 @@ namespace prime_numbers
 
         static void Main(string[] args)
         {
-            var imageWidth = 500;
-            var imageHeight = 500;
+            var timer = new Stopwatch();
+            timer.Start();
+
+            var imageWidth = 50;
+            var imageHeight = 50;
             string[] dataLocations = { 
                 @".\data\primes-to-100k.txt", 
                 @".\data\primes-to-200k.txt", 
@@ -34,12 +38,18 @@ namespace prime_numbers
             };
             var outputLocation = $"D:\\temp\\prime-numbers\\{imageWidth}x{imageHeight}.gif";
 
+            Console.WriteLine($"");
+            Console.WriteLine($"Image dimension: {imageWidth}x{imageHeight}");
+
             var data = LoadData(dataLocations);
             using(var gif = CreateGif(imageWidth, imageHeight, data))
             {
                 SaveImage(outputLocation, gif);
             }
             
+            timer.Stop();
+
+            Console.WriteLine($"Total runtime: {timer.Elapsed.ToString("mm':'ss'.'fff")}");
             Console.WriteLine($"");
         }
 
@@ -53,15 +63,22 @@ namespace prime_numbers
                 Console.Write($".");
                 var image = CreateImage(ii, width, height, data).Frames[0];
 
-                var frameMetaData = image.Metadata.GetFormatMetadata(GifFormat.Instance);
-                frameMetaData.FrameDelay = 10;
+                // TODO this is not working
+                //var frameMetaData = image.Metadata.GetFormatMetadata(GifFormat.Instance);
+                //frameMetaData.FrameDelay = 1000;
 
                 gif.Frames.AddFrame(image);
             }
             Console.WriteLine($"");
 
+            // Make the gif loop indefinitely
             var gifMetaData = gif.Metadata.GetFormatMetadata(GifFormat.Instance);
             gifMetaData.RepeatCount = 0;
+            gifMetaData.ColorTableMode = GifColorTableMode.Global;
+
+            // Make the last frame last a while (2 seconds) before looping
+            var frameMetaData = gif.Frames[gif.Frames.Count-1].Metadata.GetFormatMetadata(GifFormat.Instance);
+            frameMetaData.FrameDelay = 200;
 
             return gif;
         }
@@ -140,10 +157,10 @@ namespace prime_numbers
         {
             var data = new List<int>();
             
-            Console.WriteLine($"Loading data from");
+            Console.WriteLine($"Loading prime numbers");
             foreach (var fileName in fileNames)
             {
-                Console.WriteLine($"    {fileName}");
+                //Console.WriteLine($"    {fileName}");
                 var strings = File.ReadAllLines(fileName);
                 data.AddRange(strings.Select(x => Int32.Parse(x)).ToList());
             }
