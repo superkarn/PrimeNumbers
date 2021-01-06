@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
@@ -12,6 +13,7 @@ namespace prime_numbers
 {
     class Program
     {
+        static readonly bool USE_PARALLELIZATION = true;
         static readonly Rgba32 BLUE = new Rgba32(0, 0, 255);
         static readonly Rgba32 GREEN = new Rgba32(0, 255, 0);
         static readonly Rgba32 RED = new Rgba32(255, 0, 0);
@@ -22,8 +24,8 @@ namespace prime_numbers
             var timer = new Stopwatch();
             timer.Start();
 
-            var imageWidth = 50;
-            var imageHeight = 50;
+            var imageWidth = 200;
+            var imageHeight = 200;
             string[] dataLocations = { 
                 @".\data\primes-to-100k.txt", 
                 @".\data\primes-to-200k.txt", 
@@ -39,6 +41,7 @@ namespace prime_numbers
             var outputLocation = $"D:\\temp\\prime-numbers\\{imageWidth}x{imageHeight}.gif";
 
             Console.WriteLine($"");
+            Console.WriteLine($"Parallelization: {USE_PARALLELIZATION}");
             Console.WriteLine($"Image dimension: {imageWidth}x{imageHeight}");
 
             var data = LoadData(dataLocations);
@@ -57,17 +60,22 @@ namespace prime_numbers
         {
             var gif = new Image<Rgba32>(width, height);
 
+            ImageFrame<Rgba32>[] frames;
+
             Console.Write($"Creating frames ");
-            for (int ii = 3; ii < width; ii++) 
+            if (USE_PARALLELIZATION)
             {
-                Console.Write($".");
-                var image = CreateImage(ii, width, height, data).Frames[0];
+                frames = CreateGifFrames_Parallel(width, height, data);
+            }
+            else 
+            {
+                frames = CreateGifFrames(width, height, data);
+            }
 
-                // TODO this is not working
-                //var frameMetaData = image.Metadata.GetFormatMetadata(GifFormat.Instance);
-                //frameMetaData.FrameDelay = 1000;
-
-                gif.Frames.AddFrame(image);
+            // Add each frame to the gif
+            for (int ii = 3; ii < frames.Length; ii++)
+            {
+                gif.Frames.AddFrame(frames[ii]);
             }
             Console.WriteLine($"");
 
@@ -81,6 +89,35 @@ namespace prime_numbers
             frameMetaData.FrameDelay = 200;
 
             return gif;
+        }
+        
+        static ImageFrame<Rgba32>[] CreateGifFrames(int width, int height, int[] data)
+        {
+            var frames = new ImageFrame<Rgba32>[width];
+            
+            for (int ii = 3; ii < width; ii++) 
+            {
+                Console.Write($".");
+                frames[ii] = CreateImage(ii, width, height, data).Frames[0]; 
+            }
+
+            return frames;
+        }
+               
+        /// <summary>
+        /// Using Parallel.For to speed things up, but have to make sure the result are in order
+        /// </summary>
+        static ImageFrame<Rgba32>[] CreateGifFrames_Parallel(int width, int height, int[] data)
+        {
+            var frames = new ImageFrame<Rgba32>[width];
+
+            Parallel.For(3, width, ii =>
+                {
+                    Console.Write($".");
+                    frames[ii] = CreateImage(ii, width, height, data).Frames[0];                    
+                });
+
+            return frames;
         }
 
         static Image<Rgba32> CreateImage(int wrapWidth, int width, int height, int[] data)
