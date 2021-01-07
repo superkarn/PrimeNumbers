@@ -15,15 +15,21 @@ namespace prime_numbers
     {
         // TODO Convert these to input parameters
         static bool useParallelization = true;
-        static int imageWidth = 100;
-        static int imageHeight = 100;
-        static int startFrame = 3;
+        static int imageWidth = 1000;
+        static int imageHeight = 1000;
+        static int startFrame = 0;
         static int endFrame = imageWidth; // Must be <= imageWidth
 
+        static readonly Rgba32 BLACK = new Rgba32(0, 0, 0);
         static readonly Rgba32 BLUE = new Rgba32(0, 0, 255);
+        static readonly Rgba32 CYAN = new Rgba32(0, 255, 255);
+        static readonly Rgba32 GRAY100 = new Rgba32(225, 225, 225);
+        static readonly Rgba32 GRAY10 = new Rgba32(240, 240, 240);
         static readonly Rgba32 GREEN = new Rgba32(0, 255, 0);
+        static readonly Rgba32 PINK = new Rgba32(255, 0, 255);
         static readonly Rgba32 RED = new Rgba32(255, 0, 0);
         static readonly Rgba32 WHITE = new Rgba32(255, 255, 255);
+        static readonly Rgba32 YELLOW = new Rgba32(255, 255, 0);
 
         static void Main(string[] args)
         {
@@ -169,7 +175,7 @@ namespace prime_numbers
                     // Regular primes
                     else 
                     {
-                        image[x, y] = BLUE;
+                        image[x, y] = WHITE;
                     }
 
                     lastPrime = ii;
@@ -177,7 +183,13 @@ namespace prime_numbers
                 // Non prime numbers 
                 else
                 {
-                    image[x, y] = WHITE;
+                    // TODO Optimize drawing the grid
+                    // Color Grid
+                         if (x % 100 == 0) image[x, y] = GRAY100;
+                    else if (y % 100 == 0) image[x, y] = GRAY100;
+                    else if (x %  10 == 0) image[x, y] = GRAY10;
+                    else if (y %  10 == 0) image[x, y] = GRAY10;
+                    else                   image[x, y] = WHITE;
                 }
                 
                 // Move the pixel left to right, then top to bottom
