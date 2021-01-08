@@ -7,51 +7,44 @@ namespace prime_numbers.Generators
 {
     public class DefaultGenerator : IFrameGenator
     {
-        public Image<Rgba32> CreateFrame(int wrapWidth, int width, int height, int[] data)
+        int width;
+        int height;
+        int[] data;
+
+        public DefaultGenerator(int width = 100, int height = 100, int[] data = null)
+        {
+            this.width = width;
+            this.height = height;
+            this.data = data;
+        }
+
+        public Image<Rgba32> CreateFrame(int wrapWidth)
         {
             // wrapWidth must be <= width
-            if (wrapWidth > width)
+            if (wrapWidth > this.width)
             {
                 return null;
             }
 
-            var image = new Image<Rgba32>(width, height);
+            var image = new Image<Rgba32>(this.width, this.height);
 
             // x, y coordinate of the pixels
             var x = 0;
             var y = 0;
 
             // Get the largest number from data
-            var maxNumber = data[data.Length-1];
+            var maxNumber = this.data[this.data.Length-1];
 
             // The number of pixels in this image
-            var maxPixelCount = width * height;
-
-            var lastPrime = 0;
+            var maxPixelCount = this.width * this.height;
 
             // Loop until we run out of prime numbers or pixels
-            for (var ii = 0; ii < maxNumber && ii < maxPixelCount && y < height; ii++)
+            for (var ii = 0; ii < maxNumber && ii < maxPixelCount && y < this.height; ii++)
             {
-                //Console.WriteLine($"y,x: {y}, {x}");
-
                 // Prime numbers
-                if (data.Contains(ii))
+                if (this.data.Contains(ii))
                 {
-                    // Check for Twin prime
-                    var isTwinPrime = (ii == lastPrime+2 || Array.IndexOf(data, ii+2) > -1);
-
-                    // Twin primes
-                    if (isTwinPrime)
-                    {
-                        image[x, y] = Colors.BLUE;
-                    }
-                    // Regular primes
-                    else 
-                    {
-                        image[x, y] = Colors.WHITE;
-                    }
-
-                    lastPrime = ii;
+                    image[x, y] = Colors.BLUE;
                 }
                 // Non prime numbers 
                 else

@@ -20,6 +20,8 @@ namespace prime_numbers
         static int startFrame = 0;
         static int endFrame = imageWidth; // Must be <= imageWidth
 
+        static IFrameGenator frameGenerator;
+
         static void Main(string[] args)
         {
             var timer = new Stopwatch();
@@ -46,6 +48,9 @@ namespace prime_numbers
             Console.WriteLine($"");
 
             var data = LoadData(dataLocations);
+            
+            frameGenerator = new DefaultGenerator(imageWidth, imageHeight, data);
+
             using(var gif = CreateGif(imageWidth, imageHeight, data))
             {
                 SaveImage(outputLocation, gif);
@@ -64,7 +69,7 @@ namespace prime_numbers
 
             ImageFrame<Rgba32>[] frames;
 
-            Console.Write($"Creating frames ");
+            Console.WriteLine($"Creating frames");
             frames = CreateGifFrames_Parallel(width, height, data);
 
             // Add each frame to the gif
@@ -95,20 +100,19 @@ namespace prime_numbers
         static ImageFrame<Rgba32>[] CreateGifFrames_Parallel(int width, int height, int[] data)
         {
             var frames = new ImageFrame<Rgba32>[width];
-            var frameGenerator = new DefaultGenerator();
 
             Parallel.For(startFrame, Math.Min(endFrame, width), currentFrame =>
                 {
                     // Only calculate when the currentFrame is prime
-                    if (data.Contains(currentFrame))
-                    {
+                    //if (data.Contains(currentFrame))
+                    //{
                         Console.Write($".");
-                        frames[currentFrame] = frameGenerator.CreateFrame(currentFrame, width, height, data).Frames[0];
-                    }
-                    else 
-                    {
-                        Console.Write($"_");
-                    }
+                        frames[currentFrame] = frameGenerator.CreateFrame(currentFrame).Frames[0];
+                    //}
+                    //else 
+                    //{
+                    //    Console.Write($"_");
+                    //}
                 });
 
             return frames;
