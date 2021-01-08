@@ -3,22 +3,22 @@ using System.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace prime_numbers.Generators
+namespace prime_numbers.FrameGenerators
 {
-    public class TwinPrimeGenerator : IFrameGenator
+    public class TwinPrimeFrameGenerator : IFrameGenator
     {
         int width;
         int height;
         int[] data;
 
-        public TwinPrimeGenerator(int width = 100, int height = 100, int[] data = null)
+        public TwinPrimeFrameGenerator(int width = 100, int height = 100, int[] data = null)
         {
             this.width = width;
             this.height = height;
             this.data = data;
         }
 
-        public Image<Rgba32> CreateFrame(int wrapWidth)
+        public Image<Rgba32> Generate(int wrapWidth)
         {
             // wrapWidth must be <= width
             if (wrapWidth > this.width)

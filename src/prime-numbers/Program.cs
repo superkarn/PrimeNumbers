@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using prime_numbers.Generators;
+using prime_numbers.SetGenerators;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace prime_numbers
 {
@@ -19,8 +16,6 @@ namespace prime_numbers
         static int imageHeight = 100;
         static int startFrame = 0;
         static int endFrame = imageWidth; // Must be <= imageWidth
-
-        static IFrameGenator frameGenerator;
 
         static void Main(string[] args)
         {
@@ -49,9 +44,9 @@ namespace prime_numbers
 
             var data = LoadData(dataLocations);
             
-            frameGenerator = new DefaultGenerator(imageWidth, imageHeight, data);
+            var setGenerator = new IncreasingWidthSetGenerator(imageWidth, imageHeight, startFrame, endFrame, data);
 
-            using(var gif = CreateGif(imageWidth, imageHeight, data))
+            using(var gif = setGenerator.Generate())
             {
                 SaveImage(outputLocation, gif);
             }
@@ -62,62 +57,6 @@ namespace prime_numbers
             Console.WriteLine($"Total runtime: {timer.Elapsed.ToString("mm':'ss'.'fff")}");
             Console.WriteLine($"------------------------------");
         }
-
-        static Image<Rgba32> CreateGif(int width, int height, int[] data)
-        {
-            var gif = new Image<Rgba32>(width, height);
-
-            ImageFrame<Rgba32>[] frames;
-
-            Console.WriteLine($"Creating frames");
-            frames = CreateGifFrames_Parallel(width, height, data);
-
-            // Add each frame to the gif
-            for (int ii = startFrame; ii < endFrame && ii < frames.Length; ii++)
-            {
-                if (frames[ii] != null)
-                {
-                    gif.Frames.AddFrame(frames[ii]);
-                }
-            }
-            Console.WriteLine($"");
-
-            // Make the gif loop indefinitely
-            var gifMetaData = gif.Metadata.GetFormatMetadata(GifFormat.Instance);
-            gifMetaData.RepeatCount = 0;
-            gifMetaData.ColorTableMode = GifColorTableMode.Global;
-
-            // Make the last frame last a while (2 seconds) before looping
-            var frameMetaData = gif.Frames[gif.Frames.Count-1].Metadata.GetFormatMetadata(GifFormat.Instance);
-            frameMetaData.FrameDelay = 200;
-
-            return gif;
-        }
-               
-        /// <summary>
-        /// Using Parallel.For to speed things up, but have to make sure the result are in order
-        /// </summary>
-        static ImageFrame<Rgba32>[] CreateGifFrames_Parallel(int width, int height, int[] data)
-        {
-            var frames = new ImageFrame<Rgba32>[width];
-
-            Parallel.For(startFrame, Math.Min(endFrame, width), currentFrame =>
-                {
-                    // Only calculate when the currentFrame is prime
-                    //if (data.Contains(currentFrame))
-                    //{
-                        Console.Write($".");
-                        frames[currentFrame] = frameGenerator.CreateFrame(currentFrame).Frames[0];
-                    //}
-                    //else 
-                    //{
-                    //    Console.Write($"_");
-                    //}
-                });
-
-            return frames;
-        }
-
 
         /// <summary>
         /// Load prime number from files
