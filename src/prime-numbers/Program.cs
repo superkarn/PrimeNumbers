@@ -14,9 +14,8 @@ namespace prime_numbers
     class Program
     {
         // TODO Convert these to input parameters
-        static bool useParallelization = true;
-        static int imageWidth = 1000;
-        static int imageHeight = 1000;
+        static int imageWidth = 100;
+        static int imageHeight = 100;
         static int startFrame = 0;
         static int endFrame = imageWidth; // Must be <= imageWidth
 
@@ -52,7 +51,6 @@ namespace prime_numbers
 
             Console.WriteLine($"------------------------------");
             Console.WriteLine($"Parameters");
-            Console.WriteLine($"    Parallelization: {useParallelization}");
             Console.WriteLine($"    Image dimension: {imageWidth}x{imageHeight}");
             Console.WriteLine($"    Frames: {startFrame} to {endFrame}");
             Console.WriteLine($"");
@@ -77,19 +75,15 @@ namespace prime_numbers
             ImageFrame<Rgba32>[] frames;
 
             Console.Write($"Creating frames ");
-            if (useParallelization)
-            {
-                frames = CreateGifFrames_Parallel(width, height, data);
-            }
-            else 
-            {
-                frames = CreateGifFrames(width, height, data);
-            }
+            frames = CreateGifFrames_Parallel(width, height, data);
 
             // Add each frame to the gif
             for (int ii = startFrame; ii < endFrame && ii < frames.Length; ii++)
             {
-                gif.Frames.AddFrame(frames[ii]);
+                if (frames[ii] != null)
+                {
+                    gif.Frames.AddFrame(frames[ii]);
+                }
             }
             Console.WriteLine($"");
 
@@ -104,19 +98,6 @@ namespace prime_numbers
 
             return gif;
         }
-        
-        static ImageFrame<Rgba32>[] CreateGifFrames(int width, int height, int[] data)
-        {
-            var frames = new ImageFrame<Rgba32>[width];
-            
-            for (int ii = startFrame; ii < endFrame && ii < width ; ii++) 
-            {
-                Console.Write($".");
-                frames[ii] = CreateImage(ii, width, height, data).Frames[0]; 
-            }
-
-            return frames;
-        }
                
         /// <summary>
         /// Using Parallel.For to speed things up, but have to make sure the result are in order
@@ -125,10 +106,18 @@ namespace prime_numbers
         {
             var frames = new ImageFrame<Rgba32>[width];
 
-            Parallel.For(startFrame, Math.Min(endFrame, width), ii =>
+            Parallel.For(startFrame, Math.Min(endFrame, width), currentFrame =>
                 {
-                    Console.Write($".");
-                    frames[ii] = CreateImage(ii, width, height, data).Frames[0];                    
+                    // Only calculate when the currentFrame is prime
+                    if (data.Contains(currentFrame))
+                    {
+                        Console.Write($".");
+                        frames[currentFrame] = CreateImage(currentFrame, width, height, data).Frames[0];
+                    }
+                    else 
+                    {
+                        Console.Write($"_");
+                    }
                 });
 
             return frames;
