@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using prime_numbers.Generators;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
@@ -18,17 +19,6 @@ namespace prime_numbers
         static int imageHeight = 100;
         static int startFrame = 0;
         static int endFrame = imageWidth; // Must be <= imageWidth
-
-        static readonly Rgba32 BLACK = new Rgba32(0, 0, 0);
-        static readonly Rgba32 BLUE = new Rgba32(0, 0, 255);
-        static readonly Rgba32 CYAN = new Rgba32(0, 255, 255);
-        static readonly Rgba32 GRAY100 = new Rgba32(225, 225, 225);
-        static readonly Rgba32 GRAY10 = new Rgba32(240, 240, 240);
-        static readonly Rgba32 GREEN = new Rgba32(0, 255, 0);
-        static readonly Rgba32 PINK = new Rgba32(255, 0, 255);
-        static readonly Rgba32 RED = new Rgba32(255, 0, 0);
-        static readonly Rgba32 WHITE = new Rgba32(255, 255, 255);
-        static readonly Rgba32 YELLOW = new Rgba32(255, 255, 0);
 
         static void Main(string[] args)
         {
@@ -105,6 +95,7 @@ namespace prime_numbers
         static ImageFrame<Rgba32>[] CreateGifFrames_Parallel(int width, int height, int[] data)
         {
             var frames = new ImageFrame<Rgba32>[width];
+            var frameGenerator = new DefaultGenerator();
 
             Parallel.For(startFrame, Math.Min(endFrame, width), currentFrame =>
                 {
@@ -112,7 +103,7 @@ namespace prime_numbers
                     if (data.Contains(currentFrame))
                     {
                         Console.Write($".");
-                        frames[currentFrame] = CreateImage(currentFrame, width, height, data).Frames[0];
+                        frames[currentFrame] = frameGenerator.CreateFrame(currentFrame, width, height, data).Frames[0];
                     }
                     else 
                     {
@@ -123,78 +114,6 @@ namespace prime_numbers
             return frames;
         }
 
-        static Image<Rgba32> CreateImage(int wrapWidth, int width, int height, int[] data)
-        {
-            // wrapWidth must be <= width
-            if (wrapWidth > width)
-            {
-                return null;
-            }
-
-            var image = new Image<Rgba32>(width, height);
-
-            // x, y coordinate of the pixels
-            var x = 0;
-            var y = 0;
-
-            // Get the largest number from data
-            var maxNumber = data[data.Length-1];
-
-            // The number of pixels in this image
-            var maxPixelCount = width * height;
-
-            var lastPrime = 0;
-
-            // Loop until we run out of prime numbers or pixels
-            for (var ii = 0; ii < maxNumber && ii < maxPixelCount && y < height; ii++)
-            {
-                //Console.WriteLine($"y,x: {y}, {x}");
-
-                // Prime numbers
-                if (data.Contains(ii))
-                {
-                    // Check for Twin prime
-                    var isTwinPrime = (ii == lastPrime+2 || Array.IndexOf(data, ii+2) > -1);
-
-                    // Twin primes
-                    if (isTwinPrime)
-                    {
-                        image[x, y] = BLUE;
-                    }
-                    // Regular primes
-                    else 
-                    {
-                        image[x, y] = WHITE;
-                    }
-
-                    lastPrime = ii;
-                }
-                // Non prime numbers 
-                else
-                {
-                    // TODO Optimize drawing the grid
-                    // Color Grid
-                         if (x % 100 == 0) image[x, y] = GRAY100;
-                    else if (y % 100 == 0) image[x, y] = GRAY100;
-                    else if (x %  10 == 0) image[x, y] = GRAY10;
-                    else if (y %  10 == 0) image[x, y] = GRAY10;
-                    else                   image[x, y] = WHITE;
-                }
-                
-                // Move the pixel left to right, then top to bottom
-                if (x > wrapWidth-2) 
-                {
-                    x = 0;
-                    y++;
-                } 
-                else 
-                {
-                    x++;
-                }
-            }
-            
-            return image;
-        }
 
         /// <summary>
         /// Load prime number from files
