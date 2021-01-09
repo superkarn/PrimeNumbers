@@ -51,10 +51,10 @@ namespace prime_numbers.FrameGenerators
                 {
                     // TODO Optimize drawing the grid
                     // Color Grid
-                         if (x % 100 == 0) image[x, y] = Colors.GRAY100;
-                    else if (y % 100 == 0) image[x, y] = Colors.GRAY100;
-                    else if (x %  10 == 0) image[x, y] = Colors.GRAY10;
-                    else if (y %  10 == 0) image[x, y] = Colors.GRAY10;
+                         if (x % 100 == 0) image[x, y] = Colors.GRID100;
+                    else if (y % 100 == 0) image[x, y] = Colors.GRID100;
+                    else if (x %  10 == 0) image[x, y] = Colors.GRID10;
+                    else if (y %  10 == 0) image[x, y] = Colors.GRID10;
                     else                   image[x, y] = Colors.WHITE;
                 }
                 
