@@ -68,7 +68,13 @@ namespace binary
 
         static string[] ConvertToBinaryString(int[] data)
         {
-            return data.Select(x => Convert.ToString(x, 2)).ToArray();
+            return data.Select(x => Convert.ToString(x, 2)
+                       .PadLeft(20, ' ')
+                       .Replace('0', '-'))
+                       .Select(x => { 
+                           return x; 
+                        })
+                       .ToArray();
         }
 
         static void SaveData(string fileName, string[] data)
