@@ -23,16 +23,16 @@ namespace prime_numbers
             timer.Start();
 
             string[] dataLocations = { 
-                @".\data\primes-to-100k.txt", 
-                @".\data\primes-to-200k.txt", 
-                @".\data\primes-to-300k.txt", 
-                @".\data\primes-to-400k.txt", 
-                @".\data\primes-to-500k.txt", 
-                @".\data\primes-to-600k.txt", 
-                @".\data\primes-to-700k.txt", 
-                @".\data\primes-to-800k.txt", 
-                @".\data\primes-to-900k.txt", 
-                @".\data\primes-to-1000k.txt",
+                @"..\..\data\primes-to-100k.txt", 
+                @"..\..\data\primes-to-200k.txt", 
+                @"..\..\data\primes-to-300k.txt", 
+                @"..\..\data\primes-to-400k.txt", 
+                @"..\..\data\primes-to-500k.txt", 
+                @"..\..\data\primes-to-600k.txt", 
+                @"..\..\data\primes-to-700k.txt", 
+                @"..\..\data\primes-to-800k.txt", 
+                @"..\..\data\primes-to-900k.txt", 
+                @"..\..\data\primes-to-1000k.txt",
             };
             var outputLocation = $"D:\\temp\\prime-numbers\\{imageWidth}x{imageHeight}.gif";
 
