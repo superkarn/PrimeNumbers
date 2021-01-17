@@ -15,24 +15,38 @@ namespace prime_numbers
         static int imageWidth = 100;
         static int imageHeight = 100;
         static int startFrame = 0;
-        static int endFrame = imageWidth; // Must be <= imageWidth
+        static int endFrame = 0; // 0 = default; depends on the SetGenerator type
+        static int dataBaseType = 2; // 2 = binary; 10 = decimal
 
         static void Main(string[] args)
         {
             var timer = new Stopwatch();
             timer.Start();
 
-            string[] dataLocations = { 
+            string[] decimalDataLocations = { 
                 @"..\..\data\primes-to-100k.txt", 
-                @"..\..\data\primes-to-200k.txt", 
-                @"..\..\data\primes-to-300k.txt", 
-                @"..\..\data\primes-to-400k.txt", 
-                @"..\..\data\primes-to-500k.txt", 
-                @"..\..\data\primes-to-600k.txt", 
-                @"..\..\data\primes-to-700k.txt", 
-                @"..\..\data\primes-to-800k.txt", 
-                @"..\..\data\primes-to-900k.txt", 
-                @"..\..\data\primes-to-1000k.txt",
+                //@"..\..\data\primes-to-200k.txt", 
+                //@"..\..\data\primes-to-300k.txt", 
+                //@"..\..\data\primes-to-400k.txt", 
+                //@"..\..\data\primes-to-500k.txt", 
+                //@"..\..\data\primes-to-600k.txt", 
+                //@"..\..\data\primes-to-700k.txt", 
+                //@"..\..\data\primes-to-800k.txt", 
+                //@"..\..\data\primes-to-900k.txt", 
+                //@"..\..\data\primes-to-1000k.txt",
+            };
+
+            string[] binaryDataLocations = { 
+                @"..\..\data\binary\primes-to-100k.txt", 
+                //@"..\..\data\binary\primes-to-200k.txt", 
+                //@"..\..\data\binary\primes-to-300k.txt", 
+                //@"..\..\data\binary\primes-to-400k.txt", 
+                //@"..\..\data\binary\primes-to-500k.txt", 
+                //@"..\..\data\binary\primes-to-600k.txt", 
+                //@"..\..\data\binary\primes-to-700k.txt", 
+                //@"..\..\data\binary\primes-to-800k.txt", 
+                //@"..\..\data\binary\primes-to-900k.txt", 
+                //@"..\..\data\binary\primes-to-1000k.txt",
             };
             var outputLocation = $"D:\\temp\\prime-numbers\\{imageWidth}x{imageHeight}.gif";
 
@@ -42,9 +56,21 @@ namespace prime_numbers
             Console.WriteLine($"    Frames: {startFrame} to {endFrame}");
             Console.WriteLine($"");
 
-            var data = LoadData(dataLocations);
+            ISetGenerator setGenerator;
+            switch (dataBaseType)
+            {
+                case 2:
+                    var binaryData = LoadBinaryData(binaryDataLocations);
+                    setGenerator = new IncreasingHeightSetGenerator(imageWidth, imageHeight, startFrame, endFrame, binaryData);
+                    break;
+
+                case 10:
+                default:
+                    var decimalData = LoadDecimalData(decimalDataLocations);
+                    setGenerator = new IncreasingWidthSetGenerator(imageWidth, imageHeight, startFrame, endFrame, decimalData);
+                    break;
+            }
             
-            var setGenerator = new IncreasingWidthSetGenerator(imageWidth, imageHeight, startFrame, endFrame, data);
 
             using(var gif = setGenerator.Generate())
             {
@@ -58,14 +84,26 @@ namespace prime_numbers
             Console.WriteLine($"------------------------------");
         }
 
-        /// <summary>
-        /// Load prime number from files
-        /// </summary>
-        static int[] LoadData(string[] fileNames)
+        static int[] LoadDecimalData(string[] fileNames)
         {
             var data = new List<int>();
             
-            Console.WriteLine($"Loading prime numbers");
+            Console.WriteLine($"Loading prime numbers (decimal)");
+            foreach (var fileName in fileNames)
+            {
+                //Console.WriteLine($"    {fileName}");
+                var strings = File.ReadAllLines(fileName);
+                data.AddRange(strings.Select(x => Int32.Parse(x)).ToList());
+            }
+
+            return data.ToArray();
+        }
+
+        static int[] LoadBinaryData(string[] fileNames)
+        {
+            var data = new List<int>();
+            
+            Console.WriteLine($"Loading prime numbers (binary)");
             foreach (var fileName in fileNames)
             {
                 //Console.WriteLine($"    {fileName}");
