@@ -12,11 +12,11 @@ namespace prime_numbers
     class Program
     {
         // TODO Convert these to input parameters
-        static int imageWidth = 100;
-        static int imageHeight = 100;
-        static int startFrame = 0;
-        static int endFrame = 0; // 0 = default; depends on the SetGenerator type
-        static int dataBaseType = 2; // 2 = binary; 10 = decimal
+        static int imageWidth = 20;
+        static int imageHeight = 256;
+        static int startFrame = 6;
+        static int endFrame = 20; // 0 = default; depends on the SetGenerator type
+        static int dataBaseType = 10; // 2 = binary; 10 = decimal
 
         static void Main(string[] args)
         {
@@ -25,15 +25,15 @@ namespace prime_numbers
 
             string[] decimalDataLocations = { 
                 @"..\..\data\primes-to-100k.txt", 
-                //@"..\..\data\primes-to-200k.txt", 
-                //@"..\..\data\primes-to-300k.txt", 
-                //@"..\..\data\primes-to-400k.txt", 
-                //@"..\..\data\primes-to-500k.txt", 
-                //@"..\..\data\primes-to-600k.txt", 
-                //@"..\..\data\primes-to-700k.txt", 
-                //@"..\..\data\primes-to-800k.txt", 
-                //@"..\..\data\primes-to-900k.txt", 
-                //@"..\..\data\primes-to-1000k.txt",
+                @"..\..\data\primes-to-200k.txt", 
+                @"..\..\data\primes-to-300k.txt", 
+                @"..\..\data\primes-to-400k.txt", 
+                @"..\..\data\primes-to-500k.txt", 
+                @"..\..\data\primes-to-600k.txt", 
+                @"..\..\data\primes-to-700k.txt", 
+                @"..\..\data\primes-to-800k.txt", 
+                @"..\..\data\primes-to-900k.txt", 
+                @"..\..\data\primes-to-1000k.txt",
             };
 
             string[] binaryDataLocations = { 
@@ -60,14 +60,12 @@ namespace prime_numbers
             switch (dataBaseType)
             {
                 case 2:
-                    var binaryData = LoadBinaryData(binaryDataLocations);
-                    setGenerator = new IncreasingHeightSetGenerator(imageWidth, imageHeight, startFrame, endFrame, binaryData);
-                    break;
+                    throw new NotImplementedException();
 
                 case 10:
                 default:
                     var decimalData = LoadDecimalData(decimalDataLocations);
-                    setGenerator = new IncreasingWidthSetGenerator(imageWidth, imageHeight, startFrame, endFrame, decimalData);
+                    setGenerator = new IncreasingHeightSetGenerator(imageWidth, imageHeight, startFrame, endFrame, decimalData);
                     break;
             }
             
@@ -99,16 +97,16 @@ namespace prime_numbers
             return data.ToArray();
         }
 
-        static int[] LoadBinaryData(string[] fileNames)
+        static string[] LoadBinaryData(string[] fileNames)
         {
-            var data = new List<int>();
+            var data = new List<string>();
             
             Console.WriteLine($"Loading prime numbers (binary)");
             foreach (var fileName in fileNames)
             {
                 //Console.WriteLine($"    {fileName}");
                 var strings = File.ReadAllLines(fileName);
-                data.AddRange(strings.Select(x => Int32.Parse(x)).ToList());
+                data.AddRange(strings.Select(x => x).ToList());
             }
 
             return data.ToArray();
