@@ -77,6 +77,20 @@ namespace binary
                        .ToArray();
         }
 
+        // Convert to Binary string with least significant number on the left, expanding to the right
+        // Aka reverse order of normal binary number
+        static string[] ConvertToReverseBinaryString(int[] data)
+        {
+            return data.Select(x => Convert.ToString(x, 2)
+                       .Replace('0', '-'))
+                       .Select(x => { 
+                           var characters = x.ToCharArray();
+                           Array.Reverse(characters);
+                           return new string(characters); 
+                        })
+                       .ToArray();
+        }
+
         static void SaveData(string fileName, string[] data)
         {
             Console.WriteLine($"Saving binary strings to {fileName}");            
